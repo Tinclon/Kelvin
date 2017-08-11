@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id="myCanvas" width="400" height="300" style="border:1px solid #d3d3d3;"></canvas>
+<button onclick="left()">Left</button>
+&emsp;
+<button onclick="jump()">Jump</button>
+&emsp;
+<button onclick="flip()">Flip</button>
+&emsp;
+<button onclick="right()">Right</button>
+
+
+<script>
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+var ballRadius = 20;
+var x = canvas.width / 2;
+var y = canvas.height / 2 - ballRadius;
+var dx = 0;
+var dy = 0;
+var gravity = 1;
+var jumpState = false;
+
+function drawGround() {
+	ctx.beginPath();
+	ctx.rect(1, canvas.height / 2, canvas.width - 2, canvas.height / 2 - 1);
+	ctx.stroke();
+}
+
+function drawBall() {
+	ctx.beginPath();
+	ctx.arc(x, y, ballRadius, 0, 2 * Math.PI);
+	ctx.stroke();
+}
+
+function applyGravity() {
+	// Curb the vertical movement with gravity
+	dy += gravity;
+}
+
+function flip() {
+	gravity *= -1;
+}
+
+function jump() {
+	// Apply a vertical movement
+	if((y >= canvas.height / 2 - ballRadius || y <= ballRadius) && dy === 0) {
+		dy -= 10 * (gravity / Math.abs(gravity));
+	}
+}
+
+function draw() {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	drawGround();
+	drawBall();
+
+	var origY = y;
+	
+	x += dx;
+	y += dy;
+	
+	// Don't let y go out of bounds (too high or too low)
+	y = Math.min(Math.max(y, 0 + ballRadius), canvas.height / 2 - ballRadius);
+	
+	if(origY !== y || 
+		(y !== canvas.height / 2 - ballRadius && gravity > 0) || 
+		(y !== 0 + ballRadius && gravity < 0)) {
+		// If y has moved, or if it is not on the ground, or the ceiling, then apply gravity
+		applyGravity();
+	} else if (dy !== 0) {
+		// If y has not moved, and is not trying to move, and it is on the ground or the ceiling, then bounce...
+		dy *= -1;
+		// ... with a bit less vertical force than the last bounce
+		dy += 2 * (gravity / Math.abs(gravity));;
+	}
+}
+
+
+setInterval(draw, 10);
+</script>
+
+
+</body>
+</html>
