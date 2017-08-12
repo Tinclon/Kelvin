@@ -20,7 +20,8 @@ var y = canvas.height / 2 - ballRadius;
 var dx = 0;
 var dy = 0;
 var gravity = 1;
-var jumpState = false;
+var leftState = false;
+var rightState = false;
 
 function drawGround() {
 	ctx.beginPath();
@@ -50,10 +51,42 @@ function jump() {
 	}
 }
 
+
+function left() {
+	leftState = !leftState;
+
+	if(leftState == true) {
+		rightState = false;
+	}
+}
+
+function right() {
+	rightState = !rightState;
+
+	if(rightState == true) {
+		leftState = false;
+	}
+}
+
+
 function draw() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	drawGround();
 	drawBall();
+    
+    
+	if(leftState && x - ballRadius > 0) {
+		x -= 1;
+	}
+
+	if(leftState && x - ballRadius <= 0) {
+		y -= 1;
+	}
+
+
+	if(rightState && x + ballRadius < canvas.width) {
+		x += 1;
+	}
 
 	var origY = y;
 	
@@ -64,15 +97,17 @@ function draw() {
 	y = Math.min(Math.max(y, 0 + ballRadius), canvas.height / 2 - ballRadius);
 	
 	if(origY !== y || 
-		(y !== canvas.height / 2 - ballRadius && gravity > 0) || 
-		(y !== 0 + ballRadius && gravity < 0)) {
+		(y !== canvas.height / 2 - ballRadius && gravity > 0 && x - ballRadius !== 0) || 
+		(y !== 0 + ballRadius && gravity < 0 && x - ballRadius !== 0)) {
 		// If y has moved, or if it is not on the ground, or the ceiling, then apply gravity
 		applyGravity();
 	} else if (dy !== 0) {
 		// If y has not moved, and is not trying to move, and it is on the ground or the ceiling, then bounce...
 		dy *= -1;
 		// ... with a bit less vertical force than the last bounce
-		dy += 2 * (gravity / Math.abs(gravity));;
+		dy += 2 * (gravity / Math.abs(gravity));
+        
+
 	}
 }
 
