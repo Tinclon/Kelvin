@@ -15,13 +15,17 @@
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 var ballRadius = 20;
-var x = canvas.width / 2;
+var x = ballRadius * 2;
 var y = canvas.height / 2 - ballRadius;
 var dx = 0;
 var dy = 0;
 var gravity = 1;
 var leftState = false;
 var rightState = false;
+var boxSize = ballRadius * 2;
+var boxX = canvas.width / 2 - boxSize;
+var boxY = canvas.height / 2 - boxSize;
+
 
 function drawGround() {
 	ctx.beginPath();
@@ -69,18 +73,21 @@ function right() {
 }
 
 
+function drawBox() {
+	ctx.beginPath();
+	ctx.rect(boxX, boxY, boxSize, boxSize);
+	ctx.stroke();
+}
+
 function draw() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	drawGround();
 	drawBall();
-    
-    
+	drawBox();
+
+
 	if(leftState && x - ballRadius > 0) {
 		x -= 1;
-	}
-
-	if(leftState && x - ballRadius <= 0) {
-		y -= 1;
 	}
 
 
@@ -97,19 +104,32 @@ function draw() {
 	y = Math.min(Math.max(y, 0 + ballRadius), canvas.height / 2 - ballRadius);
 	
 	if(origY !== y || 
-		(y !== canvas.height / 2 - ballRadius && gravity > 0 && x - ballRadius !== 0) || 
-		(y !== 0 + ballRadius && gravity < 0 && x - ballRadius !== 0)) {
+		(y !== canvas.height / 2 - ballRadius && gravity > 0) || 
+		(y !== 0 + ballRadius && gravity < 0)) {
 		// If y has moved, or if it is not on the ground, or the ceiling, then apply gravity
 		applyGravity();
 	} else if (dy !== 0) {
 		// If y has not moved, and is not trying to move, and it is on the ground or the ceiling, then bounce...
-		dy *= -1;
-		// ... with a bit less vertical force than the last bounce
-		dy += 2 * (gravity / Math.abs(gravity));
-        
+		dy = 0;
+	}
 
+
+	//ball collision with box
+	if(x + ballRadius == boxX && rightState == true && y - ballRadius) {
+		boxX += 1;
+	}
+
+
+	if(x - ballRadius == boxX + boxSize && leftState == true && y - ballRadius) {
+		boxX -= 1;
+	}
+
+
+	if(y + ballRadius == boxY - boxSize) {
+		gravity = 0;
 	}
 }
+
 
 
 setInterval(draw, 10);
